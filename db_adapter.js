@@ -18,7 +18,7 @@ function Connect() {
 function Disconnect() {
     con.end(function(err) {
         if (err) {
-        return console.log('error:' + err.message);
+        return console.log('errors:' + err.message);
         }
         console.log('Close the database connection.');
     });
