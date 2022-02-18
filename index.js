@@ -68,6 +68,6 @@ webSocketServer.on('connection', ws => {
 
 });
 
-server.listen(process.env.PORT ||  8999, () => console.log("Server started"))
+server.listen(process.env.PORT, () => console.log("Server started"))
 
 console.log("heeeeeeello");
