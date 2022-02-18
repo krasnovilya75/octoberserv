@@ -72,6 +72,8 @@ webSocketServer.on('connection', ws => {
 
 });
 
-server.listen(process.env.PORT, () => console.log("Server started"))
+const PORT = process.env.PORT || 9091 
+
+server.listen(PORT, () => console.log("Server started"))
 
 console.log("heeeeeeello");
