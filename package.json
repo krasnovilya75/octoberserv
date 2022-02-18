@@ -1,25 +1,25 @@
 {
-  "name": "octoberserv",
+  "name": "octoserv",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {
-    "express": "^4.17.3",
-    "mysql": "^2.18.1",
-    "ws": "^8.5.0"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tipichniyrybak/october.git"
+    "url": "git+https://github.com/krasnovilya75/octoberserv.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/tipichniyrybak/october/issues"
+    "url": "https://github.com/krasnovilya75/octoberserv/issues"
   },
-  "homepage": "https://github.com/tipichniyrybak/october#readme"
+  "homepage": "https://github.com/krasnovilya75/octoberserv#readme",
+  "dependencies": {
+    "express": "^4.17.3",
+    "mysql": "^2.18.1",
+    "ws": "^8.5.0"
+  }
 }

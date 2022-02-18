@@ -5,13 +5,9 @@ const express = require( "express");
 const WebSocket = require( "ws");
 const dba = require('./db_adapter.js');
 
-
-
-
 const app = express();
 const server = http.createServer(app);
 const webSocketServer = new WebSocket.Server({ server });
-
 
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
