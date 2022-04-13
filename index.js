@@ -1,4 +1,4 @@
-console.log("start server...");
+console.log("starting octoserv");
 
 const http = require("http");
 const express = require( "express");
