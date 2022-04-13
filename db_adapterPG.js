@@ -1,152 +1,133 @@
 const Pool = require('pg').Pool;
 
 const pool = new Pool({
-  user: 'me',
-  host: 'localhost',
-  database: 'api',
-  password: 'password',
+  user: 'yoprqvukffdpgc',
+  host: 'ec2-52-49-68-244.eu-west-1.compute.amazonaws.com',
+  database: 'd2c64sn4997p2t',
+  password: '94c327210501c5133472e8068e15cb80aa44ac40f9105b89761f00e18203e2a4',
   port: 5432,
+  ssl: { rejectUnauthorized: false }
 });
-
 module.exports = {
 
-  LoginUser: function(login, pass) {
-    var res = null;
-    return new Promise((resolve, reject) => {
-      Connect();
+  RegisterUser: async function (login, pass) {
+    var query = `select register_new_user(\'${login}\', \'${pass}\');`;  
+    console.log(query);
+    try {
+      const res = await pool.query(
+        query,
+        []
+      );
+      console.log(res.rows[0].register_new_user);
+      return res.rows[0].register_new_user;
+    } catch (error) {
+      console.error(error);
+      return "RegisterUser: smth error";
+    }
+},
+
+  LoginUser: async function (login, pass) {
       var query = `select loginuser(\'${login}\', \'${pass}\');`;  
       console.log(query);
-
-      con.query(query, function (err, result) {            
-        if (!err) {
-          res = result[0][0]._res;
-          console.log(res);
-          resolve(res);    
-        } else {
-          res = "error";
-          reject(res);
-        }      
-      });  
-      Disconnect();
-    });
+      try {
+        const res = await pool.query(
+          query,
+          []
+        );
+        console.log(res.rows[0].loginuser);
+        return res.rows[0].loginuser;
+      } catch (error) {
+        console.error(error);
+        return "LoginUser: smth error";
+      }
   },
 
-  // RegNewUser: function(login, pass) {
-  //   var res = null;
-  //   return new Promise((resolve, reject) => {
-  //     Connect();
-  //     var query = `call RegisterNewUser(\'${login}\', \'${pass}\', @_res);`;  
-  //     console.log(query);
+  GetRooms: async function (token) {
+    var query = `select get_rooms(\'${token}\');`;  
+    try {
+      const res = await pool.query(
+        query,
+        []
+      );
+      const jres = JSON.stringify(res.rows[0]);
+      console.log(jres);
+      return jres;
 
-  //     con.query(query, function (err, result) {            
-  //       if (!err) {
-  //         res = result[1][0]._res;
-  //         console.log(res);
-  //         resolve(res);    
-  //       } else {
-  //         res = "error";
-  //         reject(res);
-  //       }      
-  //     });  
-  //     Disconnect();
-  //   });
-  // },
+    } catch (error) {
+      console.error(error);
+      return "GetRooms: smth error";
+    }
+  },
 
-  // GetRooms: function(token) {
-  //   return new Promise((resolve, reject) => {
-  //     Connect();
-  //     var query =  `call GetRooms(\'${token}\');`  
-  //     console.log(query);
+  CheckUserByLogin: async function (token, login) { 
+    var query = `select check_user_by_login(\'${token}\', \'${login}\');`;
+    console.log(query);
+    try {
+      const res = await pool.query(
+        query,
+        []
+      );
+      const jres = JSON.stringify(res.rows[0]);
+      console.log(jres);
+      return jres;
 
-  //     con.query(query, function (err, result) {            
-  //       if (!err) {
-  //         console.log(result[0][0].error);
-  //         var jres = JSON.stringify(result[0]); 
-  //         console.log(jres);
-  //         resolve(jres);           
-  //       } else {
-  //         reject('query_error');
-  //       }      
-  //     });  
-  //     Disconnect();
-  //   });
-  // },
+    } catch (error) {
+      console.error(error);
+      return "CheckUserByLogin: smth error";
+    }
+  },
 
-  // GetMessages: function(token,room_id) {
-  //   return new Promise((resolve, reject) => {
-  //     Connect();
-  //     var query = `call GetMessages(\'${token}\', ${room_id});`;
-  //     console.log(query);
+  CreateRoom: async function (token, room_name, room_users) { 
+    var query = `select create_room(\'${token}\', \'${room_name}\', \'${room_users}\');`;
+    console.log(query);
+    try {
+      const res = await pool.query(
+        query,
+        []
+      );
+      const jres = JSON.stringify(res.rows[0]);
+      console.log(jres);
+      return jres;
 
-  //     con.query(query, function (err, result) {            
-  //       if (!err) {
-  //         // console.log(result[0][0].error);
-  //         var jres = JSON.stringify(result[0]); 
-  //         console.log('jres: ' + jres);
-  //         resolve(jres);           
-  //       } else {
-  //         reject('query_error');
-  //       }      
-  //     });  
-  //     Disconnect();
-  //   });
-  // },
+    } catch (error) {
+      console.error(error);
+      return "CreateRoom: smth error";
+    }
+  },
 
-  // SendMessage: function(token, mtext, room_id) { 
-  //   return new Promise((resolve, reject) => {
-  //     Connect();
-  //     var query = `call SendMessage(\'${token}\', \'${mtext}\', ${room_id});`;
-  //     console.log(query);
-  //     con.query(query, function (err, result) {            
-  //       if (!err) {
-  //         // console.log(result[0][0].error);
-  //         var jres = JSON.stringify(result[0]); 
-  //         console.log('jres: ' + jres);
-  //         resolve(jres);           
-  //       } else {
-  //         reject('query_error');
-  //       }      
-  //     });  
-  //     Disconnect();
-  //   });
-  // },
+  GetMessages: async function (token, room_id) {
+    var query = `select get_room_messages(\'${token}\', ${room_id});`;  
+    try {
+      const res = await pool.query(
+        query,
+        []
+      );
+      const jres = JSON.stringify(res.rows[0]);
+      console.log(jres);
+      return jres;
 
-  // CheckUserByLogin: function(token, login) { 
-  //   return new Promise((resolve, reject) => {
-  //     Connect();
-  //     var query = `call CheckUserByLogin(\'${token}\', \'${login}\');`;
-  //     console.log(query);
-  //     con.query(query, function (err, result) {            
-  //       if (!err) {
-  //         // console.log(result[0][0].error);
-  //         var jres = JSON.stringify(result[0]); 
-  //         console.log('jres: ' + jres);
-  //         resolve(jres);           
-  //       } else {
-  //         reject('query_error');
-  //       }      
-  //     });  
-  //     Disconnect();
-  //   });
-  // },
+    } catch (error) {
+      console.error(error);
+      return "GetRooms: smth error";
+    }
+  },
 
-  // CreateRoom: function(token, room_name, room_users) { 
-  //   return new Promise((resolve, reject) => {
-  //     Connect();
-  //     var query = `call CreateRoom(\'${token}\', \'${room_name}\', \'${room_users}\');`;
-  //     console.log(query);
-  //     con.query(query, function (err, result) {            
-  //       if (!err) {
-  //         // console.log(result[0][0].error);
-  //         var jres = JSON.stringify(result[0]); 
-  //         console.log('jres: ' + jres);
-  //         resolve(jres);           
-  //       } else {
-  //         reject('query_error');
-  //       }      
-  //     });  
-  //     Disconnect();
-  //   });
-  // },
+  SendMessage: async function (token, mtext, room_id) { 
+    var query = `select send_mess(\'${token}\', \'${mtext}\', \'${room_id}\');`;
+    console.log(query);
+    try {
+      const res = await pool.query(
+        query,
+        []
+      );
+      const jres = JSON.stringify(res.rows[0]);
+      console.log(jres);
+      return jres;
+
+    } catch (error) {
+      console.error(error);
+      return "SendMessage: smth error";
+    }
+  },
 
 };
