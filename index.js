@@ -26,50 +26,200 @@ const parseJsonAsync = (jsonString) => {
   }
 
 webSocketServer.on('connection', ws => {
-    ws.on('message', mess => {
-        // webSocketServer.clients.forEach(client => client.send(m));
-        parseJsonAsync(mess).then(jsonMess => {
-            console.log('mess: ' + jsonMess);
+  ws.on('message', mess => {
+    console.log(mess.toString());
+    parseJsonAsync(mess).then(jsonMess => {
+      switch (jsonMess.event) {
 
-            switch (jsonMess.event) {
-                case 'login_user':
-                    console.log('login_user: ' + jsonMess.login + ' ' + jsonMess.pass);
+        case 'register_new_user':
+          dba.RegisterUser(jsonMess.login, jsonMess.pass).then(answer => {
+            console.log(`ws register_new_user answer: ${answer}`);  
+            var onRegisterUserAnswerObject = {
+              action_type: 'registerAnswer',
+              result: answer
+            } 
+            onRegisterUserAnswer = JSON.stringify(onRegisterUserAnswerObject);
+            console.log('onRegisterUserAnswer: ' + onRegisterUserAnswer);
+            ws.send(onRegisterUserAnswer);
+          }).catch( erro => {
+            console.log('register_new_user_error: ' + erro);
+          });
+          break;
+        
+        case 'hello':
+          clients.get(ws).token = jsonMess.token;
+          break;        
 
-                    clients.get(ws).token = 'logeystoken';
+        case 'login_user':
+          dba.LoginUser(jsonMess.login, jsonMess.pass).then(answer => {
+            console.log(`ws login_user answer: ${answer}`);  
 
-                    ws.send('ok');
-                    webSocketServer.clients.forEach(client => client.send('user has logged in'));
-                    break;
+            var onLoginAnswerObject = {
+              action_type: 'loginAnswer',
+              result: answer
+            } 
+            onLoginAnswer = JSON.stringify(onLoginAnswerObject);
+            console.log('onloginAnswer: ' + onLoginAnswer);
+            ws.send(onLoginAnswer);
+          }).catch( erro => {
+            console.log('login_user_error: ' + erro);
+          });
+          break;
 
-                default:
-                  //Здесь находятся инструкции, которые выполняются при отсутствии соответствующего значения
-                  //statements_def
-                  break;
-              }
+        case 'get_rooms': 
 
+          clients.forEach((client) => {
+            console.log('cli.id: ' + client.id + ' cli.token ' + client.token);
+          });
+
+          dba.GetRooms(jsonMess.token).then(answer => {
+            console.log(`ws get_rooms answer: ${answer}`);  
+
+            var onRoomsAnswerObject = {
+              action_type: 'roomsAnswer',
+              result: answer
+            } 
+            onRoomsAnswer = JSON.stringify(onRoomsAnswerObject);
+            console.log('onRoomsAnswer: ' + onRoomsAnswer);
+            ws.send(onRoomsAnswer);
+          }).catch( erro => {
+            console.log('get_rooms_error: ' + erro);
+          });
+          break;
+
+        case 'check_user_by_login':
+          dba.CheckUserByLogin(jsonMess.token, jsonMess.login).then(answer => {
+            console.log(`ws check_user_by_login answer: ${answer}`);  
+
+            var onCheckUserAnswerObject = {
+              action_type: 'checkUserAnswer',
+              result: answer
+            } 
+            onCheckUserAnswer = JSON.stringify(onCheckUserAnswerObject);
+            console.log('onCheckUserAnswer: ' + onCheckUserAnswer);
+            ws.send(onCheckUserAnswer);
+          }).catch( erro => {
+            console.log('check_user_by_login_error: ' + erro);
+          });
+          break;
+
+        case 'create_room':
+          dba.CreateRoom(jsonMess.token, jsonMess.room_name, jsonMess.room_users).then(answer => {
+            console.log(`ws create_room answer: ${answer}`);  
+
+            var onCreateRoomAnswerObject = {
+              action_type: 'CreateRoomAnswer',
+              result: answer
+            } 
+            onCreateRoomAnswer = JSON.stringify(onCreateRoomAnswerObject);
+            console.log('onCreateRoomAnswer: ' + onCreateRoomAnswer);
+            ws.send(onCreateRoomAnswer);
+          }).catch( erro => {
+            console.log('create_room_error: ' + erro);
+          });
+          break;  
+
+        case 'get_messages': 
+        dba.GetMessages(jsonMess.token, jsonMess.room_id).then(answer => {
+          console.log(`ws get_messages answer: ${answer}`);  
+
+          var onMessagesAnswerObject = {
+            action_type: 'messagesAnswer',
+            result: answer
+          } 
+          onMessagesAnswer = JSON.stringify(onMessagesAnswerObject);
+          console.log('onMessagesAnswer: ' + onMessagesAnswer);
+          ws.send(onMessagesAnswer);
+        }).catch( erro => {
+          console.log('get_messages_error: ' + erro);
         });
-    });
+        break;
 
-    ws.on("close", () => {
-        clients.delete(ws);
-    });
+        case 'send_message':
+          dba.SendMessage(jsonMess.token, jsonMess.mtext, jsonMess.room_id).then(answer => {
+            console.log(`ws send_message answer: ${answer}`);  
 
-    ws.on("error", e => ws.send(e));
-   
-    const id = uuidv4();
-    // const color = Math.floor(Math.random() * 360);
-    const token = null;
-    const metadata = { id, token };
-    clients.set(ws, metadata);
-    ws.send(id);
-    console.log('------------------------');
-    clients.forEach(client => console.log(client.id + ' ' + client.token));
-    console.log('------------------------');
+            var recipientsObj = JSON.parse(answer);
+            var recipients = JSON.parse(recipientsObj.send_mess);
+            console.log('-------------------------recipients: ');
+
+            recipients.forEach(recipient => {
+              for (let [key, value] of clients.entries()) {
+                // if (value.token === recipient.token)
+                  // console.log(key);
+                  console.log(value.token);
+              }
+              // console.log(recipient.token);
+            });
+
+            var onSendMessageAnswerObject = {
+              action_type: 'SendMessageAnswer',
+              result: answer
+            } 
+            onSendMessageAnswer = JSON.stringify(onSendMessageAnswerObject);
+            // console.log('onSendMessageAnswer: ' + onSendMessageAnswer);
+            ws.send(onSendMessageAnswer);
+          }).catch( erro => {
+            console.log('send_message_error: ' + erro);
+          });
+          break; 
+
+        default:
+          break;
+      }
+    });
+  });
+
+  ws.on("close", () => {
+      console.log('disconnected id: ' + clients.get(ws).id);
+      clearTimeout(ws.timer);
+      clients.delete(ws);
+  });
+
+  ws.on("error", e =>  {
+    ws.send(e)
+  });
+  
+
+  //  on connect
+  const id = uuidv4();
+  const token = null;
+  const metadata = { id, token };
+  clients.set(ws, metadata);
+
+
+  // const myMap = new Map();
+  // myMap.set("first_param", "first_value");
+
+  var onConnectAnswerObject = {
+    action_type: 'onConnect',
+    result: id.toString()
+  } 
+
+  onConnectAnswer = JSON.stringify(onConnectAnswerObject);
+  console.log(onConnectAnswer);
+  ws.send(onConnectAnswer);
+
+  console.log('------------------------');
+  clients.forEach(client => console.log(client.id + ' ' + client.token));
+  console.log('------------------------');
+
+  ws.timer = setInterval( 
+    function() { pingpong(ws); },
+    10000
+  );
 
 });
+
+function pingpong(ws) {
+  // console.log(ws.id+' send a ping');
+  // ws.ping();  //('coucou',{},true);
+  ws.send('ping');
+  console.log('--ppiinngg--');
+} // end of pingpong
 
 const PORT = process.env.PORT || 9091 
 
 server.listen(PORT, () => console.log("Server started"))
 
-console.log("heeeeeeello");
+// console.log("good buy");
